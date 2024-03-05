@@ -49,7 +49,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final void Function(int index, ValueItem<T> option)? onOptionRemoved;
 
   // selected option
-  final Icon? selectedOptionIcon;
+  final Widget? selectedOptionIcon;
   final Color? selectedOptionTextColor;
   final Color? selectedOptionBackgroundColor;
   final Widget Function(BuildContext, ValueItem<T>)? selectedItemBuilder;
@@ -76,7 +76,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
 
   // dropdownfield configuration
   final Color? fieldBackgroundColor;
-  final Icon suffixIcon;
+  final Widget suffixIcon;
   final bool animateSuffixIcon;
   final Icon? clearIcon;
   final Decoration? inputDecoration;
@@ -118,6 +118,10 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   /// Search label
   /// [searchLabel] is the label for search bar in dropdown.
   final String? searchLabel;
+
+  final Widget? optionIcon;
+
+  final EdgeInsets? dropdownPadding;
 
   /// MultiSelectDropDown is a widget that allows the user to select multiple options from a list of options. It is a dropdown that allows the user to select multiple options.
   ///
@@ -222,54 +226,56 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   ///    );
   /// ```
 
-  const MultiSelectDropDown(
-      {Key? key,
-      required this.onOptionSelected,
-      required this.options,
-      this.onOptionRemoved,
-      this.selectedOptionTextColor,
-      this.chipConfig = const ChipConfig(),
-      this.selectionType = SelectionType.multi,
-      this.hint = 'Select',
-      this.hintColor = Colors.grey,
-      this.hintFontSize = 14.0,
-      this.hintPadding = HintText.hintPaddingDefault,
-      this.selectedOptions = const [],
-      this.disabledOptions = const [],
-      this.alwaysShowOptionIcon = false,
-      this.optionTextStyle,
-      this.selectedOptionIcon = const Icon(Icons.check),
-      this.selectedOptionBackgroundColor,
-      this.optionsBackgroundColor,
-      this.fieldBackgroundColor = Colors.white,
-      this.dropdownHeight = 200,
-      this.showChipInSingleSelectMode = false,
-      this.suffixIcon = const Icon(Icons.arrow_drop_down),
-      this.clearIcon = const Icon(Icons.close_outlined, size: 20),
-      this.selectedItemBuilder,
-      this.optionSeparator,
-      this.inputDecoration,
-      this.hintStyle,
-      this.padding,
-      this.focusedBorderColor = Colors.black54,
-      this.borderColor = Colors.grey,
-      this.borderWidth = 0.4,
-      this.focusedBorderWidth = 0.4,
-      this.fieldBorderRadius = 12.0,
-      this.radiusGeometry,
-      this.maxItems,
-      this.focusNode,
-      this.controller,
-      this.searchEnabled = false,
-      this.dropdownBorderRadius,
-      this.dropdownMargin,
-      this.dropdownBackgroundColor,
-      this.searchBackgroundColor,
-      this.animateSuffixIcon = true,
-      this.singleSelectItemStyle,
-      this.optionBuilder,
-      this.searchLabel = 'Search'})
-      : networkConfig = null,
+  const MultiSelectDropDown({
+    Key? key,
+    required this.onOptionSelected,
+    required this.options,
+    this.onOptionRemoved,
+    this.selectedOptionTextColor,
+    this.chipConfig = const ChipConfig(),
+    this.selectionType = SelectionType.multi,
+    this.hint = 'Select',
+    this.hintColor = Colors.grey,
+    this.hintFontSize = 14.0,
+    this.hintPadding = HintText.hintPaddingDefault,
+    this.selectedOptions = const [],
+    this.disabledOptions = const [],
+    this.alwaysShowOptionIcon = false,
+    this.optionTextStyle,
+    this.selectedOptionIcon,
+    this.selectedOptionBackgroundColor,
+    this.optionsBackgroundColor,
+    this.fieldBackgroundColor = Colors.white,
+    this.dropdownHeight = 200,
+    this.showChipInSingleSelectMode = false,
+    required this.suffixIcon,
+    this.clearIcon = const Icon(Icons.close_outlined, size: 20),
+    this.selectedItemBuilder,
+    this.optionSeparator,
+    this.inputDecoration,
+    this.hintStyle,
+    this.padding,
+    this.focusedBorderColor = Colors.black54,
+    this.borderColor = Colors.grey,
+    this.borderWidth = 0.4,
+    this.focusedBorderWidth = 0.4,
+    this.fieldBorderRadius = 12.0,
+    this.radiusGeometry,
+    this.maxItems,
+    this.focusNode,
+    this.controller,
+    this.searchEnabled = false,
+    this.dropdownBorderRadius,
+    this.dropdownMargin,
+    this.dropdownBackgroundColor,
+    this.searchBackgroundColor,
+    this.animateSuffixIcon = true,
+    this.singleSelectItemStyle,
+    this.optionBuilder,
+    this.searchLabel = 'Search',
+    this.optionIcon,
+    this.dropdownPadding,
+  })  : networkConfig = null,
         responseParser = null,
         responseErrorBuilder = null,
         super(key: key);
@@ -279,56 +285,58 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   /// [responseParser] is the parser that is used to parse the response from the network call.
   /// [responseErrorBuilder] is the builder that is used to build the error widget when the network call fails.
 
-  const MultiSelectDropDown.network(
-      {Key? key,
-      required this.onOptionSelected,
-      required this.networkConfig,
-      required this.responseParser,
-      this.onOptionRemoved,
-      this.responseErrorBuilder,
-      this.selectedOptionTextColor,
-      this.chipConfig = const ChipConfig(),
-      this.selectionType = SelectionType.multi,
-      this.hint = 'Select',
-      this.hintColor = Colors.grey,
-      this.hintFontSize = 14.0,
-      this.selectedOptions = const [],
-      this.disabledOptions = const [],
-      this.alwaysShowOptionIcon = false,
-      this.optionTextStyle,
-      this.selectedOptionIcon = const Icon(Icons.check),
-      this.selectedOptionBackgroundColor,
-      this.optionsBackgroundColor,
-      this.fieldBackgroundColor = Colors.white,
-      this.dropdownHeight = 200,
-      this.showChipInSingleSelectMode = false,
-      this.suffixIcon = const Icon(Icons.arrow_drop_down),
-      this.clearIcon = const Icon(Icons.close_outlined, size: 14),
-      this.selectedItemBuilder,
-      this.optionSeparator,
-      this.inputDecoration,
-      this.hintStyle,
-      this.hintPadding = HintText.hintPaddingDefault,
-      this.padding,
-      this.borderColor = Colors.grey,
-      this.focusedBorderColor = Colors.black54,
-      this.borderWidth = 0.4,
-      this.focusedBorderWidth = 0.4,
-      this.fieldBorderRadius = 12.0,
-      this.radiusGeometry,
-      this.maxItems,
-      this.focusNode,
-      this.controller,
-      this.searchEnabled = false,
-      this.dropdownBorderRadius,
-      this.dropdownMargin,
-      this.dropdownBackgroundColor,
-      this.searchBackgroundColor,
-      this.animateSuffixIcon = true,
-      this.singleSelectItemStyle,
-      this.optionBuilder,
-      this.searchLabel = 'Search'})
-      : options = const [],
+  const MultiSelectDropDown.network({
+    Key? key,
+    required this.onOptionSelected,
+    required this.networkConfig,
+    required this.responseParser,
+    this.onOptionRemoved,
+    this.responseErrorBuilder,
+    this.selectedOptionTextColor,
+    this.chipConfig = const ChipConfig(),
+    this.selectionType = SelectionType.multi,
+    this.hint = 'Select',
+    this.hintColor = Colors.grey,
+    this.hintFontSize = 14.0,
+    this.selectedOptions = const [],
+    this.disabledOptions = const [],
+    this.alwaysShowOptionIcon = false,
+    this.optionTextStyle,
+    this.selectedOptionIcon,
+    this.selectedOptionBackgroundColor,
+    this.optionsBackgroundColor,
+    this.fieldBackgroundColor = Colors.white,
+    this.dropdownHeight = 200,
+    this.showChipInSingleSelectMode = false,
+    required this.suffixIcon,
+    this.clearIcon = const Icon(Icons.close_outlined, size: 14),
+    this.selectedItemBuilder,
+    this.optionSeparator,
+    this.inputDecoration,
+    this.hintStyle,
+    this.hintPadding = HintText.hintPaddingDefault,
+    this.padding,
+    this.borderColor = Colors.grey,
+    this.focusedBorderColor = Colors.black54,
+    this.borderWidth = 0.4,
+    this.focusedBorderWidth = 0.4,
+    this.fieldBorderRadius = 12.0,
+    this.radiusGeometry,
+    this.maxItems,
+    this.focusNode,
+    this.controller,
+    this.searchEnabled = false,
+    this.dropdownBorderRadius,
+    this.dropdownMargin,
+    this.dropdownBackgroundColor,
+    this.searchBackgroundColor,
+    this.animateSuffixIcon = true,
+    this.singleSelectItemStyle,
+    this.optionBuilder,
+    this.searchLabel = 'Search',
+    this.optionIcon,
+    this.dropdownPadding,
+  })  : options = const [],
         super(key: key);
 
   @override
@@ -686,25 +694,12 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
   }
 
   /// Get the selectedItem icon for the dropdown
-  Widget? _getSelectedIcon(bool isSelected, Color primaryColor) {
-    if (isSelected) {
-      return widget.selectedOptionIcon ??
-          Icon(
-            Icons.check,
-            color: primaryColor,
-          );
-    }
-    if (!widget.alwaysShowOptionIcon) {
-      return null;
-    }
+  Widget? _getSelectedIcon(bool isSelected) {
+    if (isSelected) return widget.selectedOptionIcon;
 
-    final Icon icon = widget.selectedOptionIcon ??
-        Icon(
-          Icons.check,
-          color: widget.optionTextStyle?.color ?? Colors.grey,
-        );
+    if (!widget.alwaysShowOptionIcon) return null;
 
-    return icon;
+    return widget.optionIcon;
   }
 
   /// Create the overlay entry for the dropdown.
@@ -765,6 +760,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                           ? BorderRadius.circular(widget.dropdownBorderRadius!)
                           : null,
                     ),
+                    padding: widget.dropdownPadding,
                     constraints: widget.searchEnabled
                         ? BoxConstraints.loose(
                             Size(size.width, widget.dropdownHeight + 50))
@@ -932,21 +928,23 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
           required void Function() onTap,
           required List<ValueItem<T>> selectedOptions}) =>
       ListTile(
-          title: Text(option.label,
-              style: widget.optionTextStyle ??
-                  TextStyle(
-                    fontSize: widget.hintFontSize,
-                  )),
-          selectedColor: widget.selectedOptionTextColor ?? primaryColor,
-          selected: isSelected,
-          autofocus: true,
-          dense: true,
-          tileColor: widget.optionsBackgroundColor ?? Colors.white,
-          selectedTileColor:
-              widget.selectedOptionBackgroundColor ?? Colors.grey.shade200,
-          enabled: !_disabledOptions.contains(option),
-          onTap: onTap,
-          trailing: _getSelectedIcon(isSelected, primaryColor));
+        title: Text(option.label,
+            style: widget.optionTextStyle ??
+                TextStyle(
+                  fontSize: widget.hintFontSize,
+                )),
+        selectedColor: widget.selectedOptionTextColor ?? primaryColor,
+        selected: isSelected,
+        autofocus: true,
+        dense: true,
+        tileColor: widget.optionsBackgroundColor ?? Colors.white,
+        selectedTileColor:
+            widget.selectedOptionBackgroundColor ?? Colors.grey.shade200,
+        enabled: !_disabledOptions.contains(option),
+        onTap: onTap,
+        leading: _getSelectedIcon(isSelected),
+        // trailing: _getSelectedIcon(isSelected, primaryColor),
+      );
 
   /// Make a request to the provided url.
   /// The response then is parsed to a list of ValueItem objects.
@@ -1037,6 +1035,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                             : widget.dropdownMargin!)
                     : Offset.zero,
                 child: Material(
+                    clipBehavior: Clip.none,
                     borderRadius: widget.dropdownBorderRadius != null
                         ? BorderRadius.circular(widget.dropdownBorderRadius!)
                         : null,
