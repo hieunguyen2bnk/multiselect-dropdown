@@ -498,7 +498,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
           child: InkWell(
             splashColor: null,
             splashFactory: null,
-            onTap: widget.disabled ? _toggleFocus : null,
+            onTap: widget.disabled ? null : _toggleFocus,
             child: Container(
               height: widget.chipConfig.wrapType == WrapType.wrap ? null : 52,
               constraints: BoxConstraints(
