@@ -125,6 +125,8 @@ class MultiSelectDropDown<T> extends StatefulWidget {
 
   final BorderRadiusGeometry? borderRadiusOption;
 
+  final bool disabled;
+
   /// MultiSelectDropDown is a widget that allows the user to select multiple options from a list of options. It is a dropdown that allows the user to select multiple options.
   ///
   ///  **Selection Type**
@@ -278,6 +280,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.optionIcon,
     this.dropdownPadding,
     this.borderRadiusOption,
+    this.disabled = false,
   })  : networkConfig = null,
         responseParser = null,
         responseErrorBuilder = null,
@@ -340,6 +343,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.optionIcon,
     this.dropdownPadding,
     this.borderRadiusOption,
+    this.disabled = false,
   })  : options = const [],
         super(key: key);
 
@@ -494,7 +498,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
           child: InkWell(
             splashColor: null,
             splashFactory: null,
-            onTap: _toggleFocus,
+            onTap: widget.disabled ? _toggleFocus : null,
             child: Container(
               height: widget.chipConfig.wrapType == WrapType.wrap ? null : 52,
               constraints: BoxConstraints(
