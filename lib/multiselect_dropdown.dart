@@ -73,7 +73,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final Color? fieldBackgroundColor;
   final Widget suffixIcon;
   final bool animateSuffixIcon;
-  final Icon? clearIcon;
+  final Widget? clearIcon;
   final Decoration? inputDecoration;
   final double? fieldBorderRadius;
   final BorderRadiusGeometry? radiusGeometry;
