@@ -13,7 +13,7 @@ dependencies:
   base_list_data:
     git:
       url: https://github.com/hieunguyen2bnk/base_list_data.git
-      ref: 6616eb5491fe8e8fc568672d2d11897d4d84e40f
+      ref: main
 
 dev_dependencies:
   flutter_test:
