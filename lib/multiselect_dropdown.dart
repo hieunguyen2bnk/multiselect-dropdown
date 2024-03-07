@@ -1,14 +1,10 @@
 library multiselect_dropdown;
 
-import 'dart:convert';
-
+import 'package:base_list_data/base_list_data.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:multi_dropdown/models/network_config.dart';
 import 'package:multi_dropdown/widgets/hint_text.dart';
 import 'package:multi_dropdown/widgets/selection_chip.dart';
 import 'package:multi_dropdown/widgets/single_selected_item.dart';
-import 'package:http/http.dart' as http;
 
 import 'models/chip_config.dart';
 import 'models/value_item.dart';
@@ -62,7 +58,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final Color? optionsBackgroundColor;
   final TextStyle? optionTextStyle;
   final double dropdownHeight;
-  final Widget? optionSeparator;
   final bool alwaysShowOptionIcon;
 
   /// option builder
@@ -100,8 +95,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final double? dropdownMargin;
 
   // network configuration
-  final NetworkConfig? networkConfig;
-  final Future<List<ValueItem<T>>> Function(dynamic)? responseParser;
+  final BaseListData<ValueItem<T>, void>? data;
   final Widget Function(BuildContext, dynamic)? responseErrorBuilder;
 
   /// focus node
@@ -126,6 +120,10 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final BorderRadiusGeometry? borderRadiusOption;
 
   final bool disabled;
+
+  final Widget? loading;
+
+  final Widget? loadingMore;
 
   /// MultiSelectDropDown is a widget that allows the user to select multiple options from a list of options. It is a dropdown that allows the user to select multiple options.
   ///
@@ -255,7 +253,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     required this.suffixIcon,
     this.clearIcon = const Icon(Icons.close_outlined, size: 20),
     this.selectedItemBuilder,
-    this.optionSeparator,
     this.inputDecoration,
     this.hintStyle,
     this.padding,
@@ -281,21 +278,21 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.dropdownPadding,
     this.borderRadiusOption,
     this.disabled = false,
-  })  : networkConfig = null,
-        responseParser = null,
+  })  : data = null,
+        loading = null,
+        loadingMore = null,
         responseErrorBuilder = null,
         super(key: key);
 
   /// Constructor for MultiSelectDropDown that fetches the options from a network call.
-  /// [networkConfig] is the configuration for the network call.
-  /// [responseParser] is the parser that is used to parse the response from the network call.
   /// [responseErrorBuilder] is the builder that is used to build the error widget when the network call fails.
 
   const MultiSelectDropDown.network({
     Key? key,
     required this.onOptionSelected,
-    required this.networkConfig,
-    required this.responseParser,
+    required this.data,
+    required this.loading,
+    required this.loadingMore,
     this.onOptionRemoved,
     this.responseErrorBuilder,
     this.selectedOptionTextColor,
@@ -317,7 +314,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     required this.suffixIcon,
     this.clearIcon = const Icon(Icons.close_outlined, size: 14),
     this.selectedItemBuilder,
-    this.optionSeparator,
     this.inputDecoration,
     this.hintStyle,
     this.hintPadding = HintText.hintPaddingDefault,
@@ -369,9 +365,6 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
   late final FocusNode _focusNode;
   final LayerLink _layerLink = LayerLink();
 
-  /// Response from the network call.
-  dynamic _reponseBody;
-
   /// value notifier that is used for controller.
   late MultiSelectController<T> _controller;
 
@@ -393,8 +386,8 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
   /// If the options are passed as a parameter, then the options are initialized.
   void _initialize() async {
     if (!mounted) return;
-    if (widget.networkConfig?.url != null) {
-      await _fetchNetwork();
+    if (widget.data != null) {
+      await widget.data!.getList(onLoadDone: _options.addAll);
     } else {
       _options.addAll(_controller.options.isNotEmpty == true
           ? _controller.options
@@ -446,7 +439,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
   /// Handles the focus change to show/hide the dropdown.
   void _handleFocusChange() {
     if (_focusNode.hasFocus && mounted) {
-      _overlayEntry = _reponseBody != null && widget.networkConfig != null
+      _overlayEntry = widget.data != null && widget.data!.error != null
           ? _buildNetworkErrorOverlayEntry()
           : _buildOverlayEntry();
       Overlay.of(context).insert(_overlayEntry!);
@@ -507,22 +500,24 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
               ),
               padding: _getContainerPadding(),
               decoration: _getContainerDecoration(),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _getContainerContent(),
-                  ),
-                  if (widget.clearIcon != null && _anyItemSelected) ...[
-                    const SizedBox(width: 4),
-                    InkWell(
-                      onTap: () => clear(),
-                      child: widget.clearIcon,
-                    ),
-                    const SizedBox(width: 4)
-                  ],
-                  _buildSuffixIcon(),
-                ],
-              ),
+              child: widget.data == null || !widget.data!.loading
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: _getContainerContent(),
+                        ),
+                        if (widget.clearIcon != null && _anyItemSelected) ...[
+                          const SizedBox(width: 4),
+                          InkWell(
+                            onTap: () => clear(),
+                            child: widget.clearIcon,
+                          ),
+                          const SizedBox(width: 4)
+                        ],
+                        _buildSuffixIcon(),
+                      ],
+                    )
+                  : widget.loading ?? const SizedBox.shrink(),
             ),
           ),
         ),
@@ -720,11 +715,84 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
     final showOnTop = values[1] as bool;
 
     return OverlayEntry(builder: (context) {
-      List<ValueItem<T>> options = _options;
       List<ValueItem<T>> selectedOptions = [..._selectedOptions];
       final searchController = TextEditingController();
+      final scroll = ScrollController();
 
       return StatefulBuilder(builder: ((context, dropdownState) {
+        List<ValueItem<T>> options = _options;
+        Widget renderOption(int index) {
+          final option = options[index];
+          final isSelected = selectedOptions.contains(option);
+
+          onTap() {
+            if (widget.selectionType == SelectionType.multi) {
+              if (isSelected) {
+                dropdownState(() {
+                  selectedOptions.remove(option);
+                });
+                setState(() {
+                  _selectedOptions.remove(option);
+                });
+              } else {
+                final bool hasReachMax = widget.maxItems == null
+                    ? false
+                    : (_selectedOptions.length + 1) > widget.maxItems!;
+                if (hasReachMax) return;
+
+                dropdownState(() {
+                  selectedOptions.add(option);
+                });
+                setState(() {
+                  _selectedOptions.add(option);
+                });
+              }
+            } else {
+              dropdownState(() {
+                selectedOptions.clear();
+                selectedOptions.add(option);
+              });
+              setState(() {
+                _selectedOptions.clear();
+                _selectedOptions.add(option);
+              });
+              _focusNode.unfocus();
+            }
+
+            _controller.value._selectedOptions.clear();
+            _controller.value._selectedOptions.addAll(_selectedOptions);
+
+            widget.onOptionSelected?.call(_selectedOptions);
+          }
+
+          if (widget.optionBuilder != null) {
+            return InkWell(
+              onTap: onTap,
+              child: widget.optionBuilder!(context, option, isSelected),
+            );
+          }
+
+          final primaryColor = Theme.of(context).primaryColor;
+
+          return _buildOption(
+            option: option,
+            primaryColor: primaryColor,
+            isSelected: isSelected,
+            dropdownState: dropdownState,
+            onTap: onTap,
+            selectedOptions: selectedOptions,
+          );
+        }
+
+        if (widget.data != null) {
+          widget.data!.setFncRender(dropdownState);
+          scroll.addListener(() {
+            if (scroll.position.pixels >= scroll.position.maxScrollExtent) {
+              widget.data!.getList(onLoadDone: _options.addAll);
+            }
+          });
+        }
+
         return Stack(
           children: [
             Positioned.fill(
@@ -840,82 +908,17 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                           ),
                         ],
                         Expanded(
-                          child: ListView.separated(
-                            separatorBuilder: (_, __) =>
-                                widget.optionSeparator ??
-                                const SizedBox(height: 0),
+                          child: ListView(
+                            controller: scroll,
                             shrinkWrap: true,
                             padding: EdgeInsets.zero,
-                            itemCount: options.length,
-                            itemBuilder: (context, index) {
-                              final option = options[index];
-                              final isSelected =
-                                  selectedOptions.contains(option);
-
-                              onTap() {
-                                if (widget.selectionType ==
-                                    SelectionType.multi) {
-                                  if (isSelected) {
-                                    dropdownState(() {
-                                      selectedOptions.remove(option);
-                                    });
-                                    setState(() {
-                                      _selectedOptions.remove(option);
-                                    });
-                                  } else {
-                                    final bool hasReachMax =
-                                        widget.maxItems == null
-                                            ? false
-                                            : (_selectedOptions.length + 1) >
-                                                widget.maxItems!;
-                                    if (hasReachMax) return;
-
-                                    dropdownState(() {
-                                      selectedOptions.add(option);
-                                    });
-                                    setState(() {
-                                      _selectedOptions.add(option);
-                                    });
-                                  }
-                                } else {
-                                  dropdownState(() {
-                                    selectedOptions.clear();
-                                    selectedOptions.add(option);
-                                  });
-                                  setState(() {
-                                    _selectedOptions.clear();
-                                    _selectedOptions.add(option);
-                                  });
-                                  _focusNode.unfocus();
-                                }
-
-                                _controller.value._selectedOptions.clear();
-                                _controller.value._selectedOptions
-                                    .addAll(_selectedOptions);
-
-                                widget.onOptionSelected?.call(_selectedOptions);
-                              }
-
-                              if (widget.optionBuilder != null) {
-                                return InkWell(
-                                  onTap: onTap,
-                                  child: widget.optionBuilder!(
-                                      context, option, isSelected),
-                                );
-                              }
-
-                              final primaryColor =
-                                  Theme.of(context).primaryColor;
-
-                              return _buildOption(
-                                option: option,
-                                primaryColor: primaryColor,
-                                isSelected: isSelected,
-                                dropdownState: dropdownState,
-                                onTap: onTap,
-                                selectedOptions: selectedOptions,
-                              );
-                            },
+                            children: [
+                              ...List.generate(options.length, renderOption),
+                              if (widget.data != null &&
+                                  widget.data!.loadingMore &&
+                                  widget.loadingMore != null)
+                                widget.loadingMore!
+                            ],
                           ),
                         ),
                       ],
@@ -956,61 +959,6 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
             : RoundedRectangleBorder(borderRadius: widget.borderRadiusOption!),
         // trailing: _getSelectedIcon(isSelected, primaryColor),
       );
-
-  /// Make a request to the provided url.
-  /// The response then is parsed to a list of ValueItem objects.
-  Future<void> _fetchNetwork() async {
-    final result = await _performNetworkRequest();
-    http.get(Uri.parse(widget.networkConfig!.url));
-    if (result.statusCode == 200) {
-      final data = json.decode(result.body);
-      final List<ValueItem<T>> parsedOptions =
-          await widget.responseParser!(data);
-      _reponseBody = null;
-      _options.addAll(parsedOptions);
-    } else {
-      _reponseBody = result.body;
-    }
-  }
-
-  /// Perform the network request according to the provided configuration.
-  Future<Response> _performNetworkRequest() async {
-    switch (widget.networkConfig!.method) {
-      case RequestMethod.get:
-        return await http.get(
-          Uri.parse(widget.networkConfig!.url),
-          headers: widget.networkConfig!.headers,
-        );
-      case RequestMethod.post:
-        return await http.post(
-          Uri.parse(widget.networkConfig!.url),
-          body: widget.networkConfig!.body,
-          headers: widget.networkConfig!.headers,
-        );
-      case RequestMethod.put:
-        return await http.put(
-          Uri.parse(widget.networkConfig!.url),
-          body: widget.networkConfig!.body,
-          headers: widget.networkConfig!.headers,
-        );
-      case RequestMethod.patch:
-        return await http.patch(
-          Uri.parse(widget.networkConfig!.url),
-          body: widget.networkConfig!.body,
-          headers: widget.networkConfig!.headers,
-        );
-      case RequestMethod.delete:
-        return await http.delete(
-          Uri.parse(widget.networkConfig!.url),
-          headers: widget.networkConfig!.headers,
-        );
-      default:
-        return await http.get(
-          Uri.parse(widget.networkConfig!.url),
-          headers: widget.networkConfig!.headers,
-        );
-    }
-  }
 
   /// Builds overlay entry for showing error when fetching data from network fails.
   OverlayEntry _buildNetworkErrorOverlayEntry() {
@@ -1060,11 +1008,11 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                           children: [
                             widget.responseErrorBuilder != null
                                 ? widget.responseErrorBuilder!(
-                                    context, _reponseBody)
+                                    context, widget.data!.error)
                                 : Padding(
                                     padding: const EdgeInsets.all(16.0),
                                     child: Text(
-                                        'Error fetching data: $_reponseBody'),
+                                        'Error fetching data: ${widget.data!.error}'),
                                   ),
                           ],
                         ))))

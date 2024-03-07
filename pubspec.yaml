@@ -10,7 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.1.0
+  base_list_data:
+    git:
+      url: https://github.com/hieunguyen2bnk/base_list_data.git
+      ref: c125d71aa2fff9b7354824550b2f2c2ccbd01c8b
 
 dev_dependencies:
   flutter_test:
