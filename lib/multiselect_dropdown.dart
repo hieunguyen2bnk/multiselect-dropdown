@@ -484,7 +484,6 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
 
   @override
   Widget build(BuildContext context) {
-    print(1);
     return Semantics(
       button: true,
       enabled: true,
@@ -789,7 +788,6 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
         }
 
         if (widget.data != null) {
-          print(2);
           widget.data!.setFncRender(dropdownState);
           scroll.addListener(() {
             if (scroll.position.pixels >= scroll.position.maxScrollExtent) {
