@@ -387,7 +387,12 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
   void _initialize() async {
     if (!mounted) return;
     if (widget.data != null) {
-      await widget.data!.getList(onLoadDone: _options.addAll);
+      if (widget.data!.list.isEmpty) {
+        widget.data!.setFncRender(setState);
+        await widget.data!.getList(onLoadDone: _options.addAll);
+      } else {
+        _options.addAll(widget.data!.list);
+      }
     } else {
       _options.addAll(_controller.options.isNotEmpty == true
           ? _controller.options
@@ -479,6 +484,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
 
   @override
   Widget build(BuildContext context) {
+    print(1);
     return Semantics(
       button: true,
       enabled: true,
@@ -501,22 +507,20 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
               padding: _getContainerPadding(),
               decoration: _getContainerDecoration(),
               child: widget.data == null || !widget.data!.loading
-                  ? Row(
-                      children: [
-                        Expanded(
-                          child: _getContainerContent(),
+                  ? Row(children: [
+                      Expanded(
+                        child: _getContainerContent(),
+                      ),
+                      if (widget.clearIcon != null && _anyItemSelected) ...[
+                        const SizedBox(width: 4),
+                        InkWell(
+                          onTap: () => clear(),
+                          child: widget.clearIcon,
                         ),
-                        if (widget.clearIcon != null && _anyItemSelected) ...[
-                          const SizedBox(width: 4),
-                          InkWell(
-                            onTap: () => clear(),
-                            child: widget.clearIcon,
-                          ),
-                          const SizedBox(width: 4)
-                        ],
-                        _buildSuffixIcon(),
+                        const SizedBox(width: 4)
                       ],
-                    )
+                      _buildSuffixIcon(),
+                    ])
                   : widget.loading ?? const SizedBox.shrink(),
             ),
           ),
@@ -785,6 +789,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
         }
 
         if (widget.data != null) {
+          print(2);
           widget.data!.setFncRender(dropdownState);
           scroll.addListener(() {
             if (scroll.position.pixels >= scroll.position.maxScrollExtent) {
