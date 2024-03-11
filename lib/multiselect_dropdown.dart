@@ -71,7 +71,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final Color? fieldBackgroundColor;
   final Widget suffixIcon;
   final bool animateSuffixIcon;
-  final Widget? clearIcon;
   final Decoration? inputDecoration;
   final double? fieldBorderRadius;
   final BorderRadiusGeometry? radiusGeometry;
@@ -124,6 +123,8 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final double? height;
 
   final Widget Function(List<ValueItem> selectedOptions)? renderSelected;
+
+  final Function(void Function() clear)? renderClearIcon;
 
   /// MultiSelectDropDown is a widget that allows the user to select multiple options from a list of options. It is a dropdown that allows the user to select multiple options.
   ///
@@ -250,7 +251,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.fieldBackgroundColor = Colors.white,
     this.dropdownHeight = 200,
     required this.suffixIcon,
-    this.clearIcon = const Icon(Icons.close_outlined, size: 20),
+    this.renderClearIcon,
     this.selectedItemBuilder,
     this.inputDecoration,
     this.hintStyle,
@@ -311,7 +312,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.fieldBackgroundColor = Colors.white,
     this.dropdownHeight = 200,
     required this.suffixIcon,
-    this.clearIcon = const Icon(Icons.close_outlined, size: 14),
+    this.renderClearIcon,
     this.selectedItemBuilder,
     this.inputDecoration,
     this.hintStyle,
@@ -508,14 +509,8 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                       Expanded(
                         child: _getContainerContent(),
                       ),
-                      if (widget.clearIcon != null && _anyItemSelected) ...[
-                        const SizedBox(width: 4),
-                        InkWell(
-                          onTap: () => clear(),
-                          child: widget.clearIcon,
-                        ),
-                        const SizedBox(width: 4)
-                      ],
+                      if (widget.renderClearIcon != null && _anyItemSelected)
+                        widget.renderClearIcon!(clear),
                       _buildSuffixIcon(),
                     ])
                   : widget.loading ?? const SizedBox.shrink(),
