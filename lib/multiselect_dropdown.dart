@@ -4,7 +4,6 @@ import 'package:base_list_data/base_list_data.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_dropdown/widgets/hint_text.dart';
 import 'package:multi_dropdown/widgets/selection_chip.dart';
-import 'package:multi_dropdown/widgets/single_selected_item.dart';
 
 import 'models/chip_config.dart';
 import 'models/value_item.dart';
@@ -51,7 +50,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final Widget Function(BuildContext, ValueItem<T>)? selectedItemBuilder;
 
   // chip configuration
-  final bool showChipInSingleSelectMode;
   final ChipConfig chipConfig;
 
   // options configuration
@@ -82,8 +80,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final double? borderWidth;
   final double? focusedBorderWidth;
   final EdgeInsets? padding;
-
-  final TextStyle? singleSelectItemStyle;
 
   final int? maxItems;
 
@@ -124,6 +120,10 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final Widget? loading;
 
   final Widget? loadingMore;
+
+  final double? height;
+
+  final Widget Function(List<ValueItem> selectedOptions)? renderSelected;
 
   /// MultiSelectDropDown is a widget that allows the user to select multiple options from a list of options. It is a dropdown that allows the user to select multiple options.
   ///
@@ -249,7 +249,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.optionsBackgroundColor,
     this.fieldBackgroundColor = Colors.white,
     this.dropdownHeight = 200,
-    this.showChipInSingleSelectMode = false,
     required this.suffixIcon,
     this.clearIcon = const Icon(Icons.close_outlined, size: 20),
     this.selectedItemBuilder,
@@ -271,13 +270,14 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.dropdownBackgroundColor,
     this.searchBackgroundColor,
     this.animateSuffixIcon = true,
-    this.singleSelectItemStyle,
     this.optionBuilder,
     this.searchLabel = 'Search',
     this.optionIcon,
     this.dropdownPadding,
     this.borderRadiusOption,
     this.disabled = false,
+    this.height,
+    this.renderSelected,
   })  : data = null,
         loading = null,
         loadingMore = null,
@@ -310,7 +310,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.optionsBackgroundColor,
     this.fieldBackgroundColor = Colors.white,
     this.dropdownHeight = 200,
-    this.showChipInSingleSelectMode = false,
     required this.suffixIcon,
     this.clearIcon = const Icon(Icons.close_outlined, size: 14),
     this.selectedItemBuilder,
@@ -333,13 +332,14 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.dropdownBackgroundColor,
     this.searchBackgroundColor,
     this.animateSuffixIcon = true,
-    this.singleSelectItemStyle,
     this.optionBuilder,
     this.searchLabel = 'Search',
     this.optionIcon,
     this.dropdownPadding,
     this.borderRadiusOption,
     this.disabled = false,
+    this.height,
+    this.renderSelected,
   })  : options = const [],
         super(key: key);
 
@@ -498,12 +498,10 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
             splashFactory: null,
             onTap: widget.disabled ? null : _toggleFocus,
             child: Container(
-              height: widget.chipConfig.wrapType == WrapType.wrap ? null : 52,
-              constraints: BoxConstraints(
-                minWidth: MediaQuery.of(context).size.width,
-                minHeight: 52,
-              ),
-              padding: _getContainerPadding(),
+              height: widget.height,
+              constraints:
+                  BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+              padding: widget.padding,
               decoration: _getContainerDecoration(),
               child: widget.data == null || !widget.data!.loading
                   ? Row(children: [
@@ -550,11 +548,8 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
       );
     }
 
-    if (widget.selectionType == SelectionType.single &&
-        !widget.showChipInSingleSelectMode) {
-      return SingleSelectedItem(
-          label: _selectedOptions.first.label,
-          style: widget.singleSelectItemStyle);
+    if (widget.renderSelected != null) {
+      return widget.renderSelected!(_selectedOptions);
     }
 
     return _buildSelectedItems();
@@ -1076,16 +1071,6 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
         _focusNode.unfocus();
       }
     }
-  }
-
-  // get the container padding.
-  EdgeInsetsGeometry _getContainerPadding() {
-    if (widget.padding != null) {
-      return widget.padding!;
-    }
-    return widget.selectionType == SelectionType.single
-        ? const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0)
-        : const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0);
   }
 }
 
