@@ -124,7 +124,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
 
   final Widget Function(List<ValueItem> selectedOptions)? renderSelected;
 
-  final Function(void Function() clear)? renderClearIcon;
+  final Widget Function(void Function() clear)? renderClearIcon;
 
   /// MultiSelectDropDown is a widget that allows the user to select multiple options from a list of options. It is a dropdown that allows the user to select multiple options.
   ///
