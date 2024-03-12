@@ -3,16 +3,12 @@ library multiselect_dropdown;
 import 'package:base_list_data/base_list_data.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_dropdown/widgets/hint_text.dart';
-import 'package:multi_dropdown/widgets/selection_chip.dart';
 
-import 'models/chip_config.dart';
 import 'models/value_item.dart';
 import 'enum/app_enums.dart';
 
 export 'enum/app_enums.dart';
-export 'models/chip_config.dart';
 export 'models/value_item.dart';
-export 'models/network_config.dart';
 
 typedef OnOptionSelected<T> = void Function(List<ValueItem<T>> selectedOptions);
 
@@ -33,14 +29,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final List<ValueItem<T>> disabledOptions;
   final OnOptionSelected<T>? onOptionSelected;
 
-  /// [onOptionRemoved] is the callback that is called when an option is removed.The callback takes two arguments, the index of the removed option and the removed option.
-  /// This will be called only when the delete icon is clicked on the option chip.
-  ///
-  /// This will not be called when the option is removed programmatically.
-  ///
-  /// ```index``` is the index of the removed option.
-  ///
-  /// ```option``` is the removed option.
   final void Function(int index, ValueItem<T> option)? onOptionRemoved;
 
   // selected option
@@ -49,23 +37,13 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final Color? selectedOptionBackgroundColor;
   final Widget Function(BuildContext, ValueItem<T>)? selectedItemBuilder;
 
-  // chip configuration
-  final ChipConfig chipConfig;
-
   // options configuration
   final Color? optionsBackgroundColor;
   final TextStyle? optionTextStyle;
   final double dropdownHeight;
   final bool alwaysShowOptionIcon;
 
-  /// option builder
-  /// [optionBuilder] is the builder that is used to build the option item.
-  /// The builder takes three arguments, the context, the option and the selected status of the option.
-  /// The builder returns a widget.
-  ///
-
-  final Widget Function(BuildContext ctx, ValueItem<T> item, bool selected)?
-      optionBuilder;
+  final Widget Function(BuildContext ctx, ValueItem<T> item, bool selected)? optionBuilder;
 
   // dropdownfield configuration
   final Color? fieldBackgroundColor;
@@ -100,10 +78,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   /// [controller] is the controller for the dropdown. It can be used to programmatically open and close the dropdown.
   final MultiSelectController<T>? controller;
 
-  /// Enable search
-  /// [searchEnabled] is the flag to enable search in dropdown. It is used to show search bar in dropdown.
-  final bool searchEnabled;
-
   /// Search label
   /// [searchLabel] is the label for search bar in dropdown.
   final String? searchLabel;
@@ -120,114 +94,12 @@ class MultiSelectDropDown<T> extends StatefulWidget {
 
   final Widget? loadingMore;
 
-  final Widget Function(List<ValueItem> selectedOptions)? renderSelected;
+  final Widget Function(List<ValueItem> selectedOptions) renderSelected;
 
   final Widget Function(void Function() clear)? renderClearIcon;
 
-  final void Function(bool hasFocus)? onFocusSearch;
-
-  /// MultiSelectDropDown is a widget that allows the user to select multiple options from a list of options. It is a dropdown that allows the user to select multiple options.
-  ///
-  ///  **Selection Type**
-  ///
-  ///   [selectionType] is the type of selection that the user can make. The default is [SelectionType.single].
-  /// * [SelectionType.single] - allows the user to select only one option.
-  /// * [SelectionType.multi] - allows the user to select multiple options.
-  ///
-  ///  **Options**
-  ///
-  /// [options] is the list of options that the user can select from. The options need to be of type [ValueItem].
-  ///
-  /// [selectedOptions] is the list of options that are pre-selected when the widget is first displayed. The options need to be of type [ValueItem].
-  ///
-  /// [disabledOptions] is the list of options that the user cannot select. The options need to be of type [ValueItem]. If the items in this list are not available in options, will be ignored.
-  ///
-  /// [onOptionSelected] is the callback that is called when an option is selected or unselected. The callback takes one argument of type `List<ValueItem>`.
-  ///
-  /// **Selected Option**
-  ///
-  /// [selectedOptionIcon] is the icon that is used to indicate the selected option.
-  ///
-  /// [selectedOptionTextColor] is the color of the selected option.
-  ///
-  /// [selectedOptionBackgroundColor] is the background color of the selected option.
-  ///
-  /// [selectedItemBuilder] is the builder that is used to build the selected option. If this is not provided, the default builder is used.
-  ///
-  /// **Chip Configuration**
-  ///
-  /// [showChipInSingleSelectMode] is used to show the chip in single select mode. The default is false.
-  ///
-  /// [chipConfig] is the configuration for the chip.
-  ///
-  /// **Options Configuration**
-  ///
-  /// [optionsBackgroundColor] is the background color of the options. The default is [Colors.white].
-  ///
-  /// [optionTextStyle] is the text style of the options.
-  ///
-  /// [optionSeparator] is the seperator between the options.
-  ///
-  /// [dropdownHeight] is the height of the dropdown options. The default is 200.
-  ///
-  ///  **Dropdown Configuration**
-  ///
-  /// [fieldBackgroundColor] is the background color of the dropdown. The default is [Colors.white].
-  ///
-  /// [suffixIcon] is the icon that is used to indicate the dropdown. The default is [Icons.arrow_drop_down].
-  ///
-  /// [inputDecoration] is the decoration of the dropdown.
-  ///
-  /// [dropdownHeight] is the height of the dropdown. The default is 200.
-  ///
-  ///  **Hint**
-  ///
-  /// [hint] is the hint text to be displayed when no option is selected.
-  ///
-  /// [hintColor] is the color of the hint text. The default is [Colors.grey.shade300].
-  ///
-  /// [hintFontSize] is the font size of the hint text. The default is 14.0.
-  ///
-  /// [hintStyle] is the style of the hint text.
-  ///
-  /// [animateSuffixIcon] is the flag to enable animation for the suffix icon. The default is true.
-  ///
-  ///  **Example**
-  ///
-  /// ```dart
-  ///  final List<ValueItem> options = [
-  ///     ValueItem(label: 'Option 1', value: '1'),
-  ///     ValueItem(label: 'Option 2', value: '2'),
-  ///     ValueItem(label: 'Option 3', value: '3'),
-  ///   ];
-  ///
-  ///   final List<ValueItem> selectedOptions = [
-  ///     ValueItem(label: 'Option 1', value: '1'),
-  ///   ];
-  ///
-  ///   final List<ValueItem> disabledOptions = [
-  ///     ValueItem(label: 'Option 2', value: '2'),
-  ///   ];
-  ///
-  ///  MultiSelectDropDown(
-  ///    onOptionSelected: (option) {},
-  ///    options: const <ValueItem>[
-  ///       ValueItem(label: 'Option 1', value: '1'),
-  ///       ValueItem(label: 'Option 2', value: '2'),
-  ///       ValueItem(label: 'Option 3', value: '3'),
-  ///       ValueItem(label: 'Option 4', value: '4'),
-  ///       ValueItem(label: 'Option 5', value: '5'),
-  ///       ValueItem(label: 'Option 6', value: '6'),
-  ///    ],
-  ///    selectionType: SelectionType.multi,
-  ///    selectedOptions: selectedOptions,
-  ///    disabledOptions: disabledOptions,
-  ///    onOptionSelected: (List<ValueItem> selectedOptions) {
-  ///      debugPrint('onOptionSelected: $option');
-  ///    },
-  ///    chipConfig: const ChipConfig(wrapType: WrapType.scroll),
-  ///    );
-  /// ```
+  final Widget Function(FocusNode? focusNode, void Function(String v) search)?
+      onRenderSearch;
 
   const MultiSelectDropDown({
     Key? key,
@@ -236,11 +108,10 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     required this.data,
     required this.loading,
     required this.loadingMore,
-    this.onFocusSearch,
+    required this.renderSelected,
     this.onOptionRemoved,
     this.responseErrorBuilder,
     this.selectedOptionTextColor,
-    this.chipConfig = const ChipConfig(),
     this.selectionType = SelectionType.multi,
     this.hint = 'Select',
     this.hintColor = Colors.grey,
@@ -253,7 +124,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.selectedOptionBackgroundColor,
     this.optionsBackgroundColor,
     this.fieldBackgroundColor = Colors.white,
-    this.dropdownHeight = 200,
+    required this.dropdownHeight,
     required this.suffixIcon,
     this.renderClearIcon,
     this.selectedItemBuilder,
@@ -270,7 +141,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.maxItems,
     this.focusNode,
     this.controller,
-    this.searchEnabled = false,
+    this.onRenderSearch,
     this.dropdownBorderRadius,
     this.dropdownMargin,
     this.dropdownBackgroundColor,
@@ -282,7 +153,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.dropdownPadding,
     this.borderRadiusOption,
     this.disabled = false,
-    this.renderSelected,
   }) : super(key: key);
 
   @override
@@ -331,14 +201,15 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
     if (widget.data != null) {
       if (widget.data!.list.isEmpty) {
         widget.data!.setFncRender(setState);
-        await widget.data!.getList(onLoadDone: _options.addAll);
+        await widget.data!.getList(onLoadDone: (v) {
+          if (mounted) _options.addAll(v);
+        });
       } else {
         _options.addAll(widget.data!.list);
       }
     } else {
-      _options.addAll(_controller.options.isNotEmpty == true
-          ? _controller.options
-          : widget.options);
+      _options
+          .addAll(_controller.options.isNotEmpty == true ? _controller.options : widget.options);
     }
     _addOptions();
     if (mounted) {
@@ -355,12 +226,9 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
 
     _focusNode.addListener(_handleFocusChange);
 
-    if (widget.searchEnabled) {
+    if (widget.onRenderSearch != null) {
       _searchFocusNode = FocusNode();
-      _searchFocusNode!.addListener(() {
-        _handleFocusChange();
-        widget.onFocusSearch?.call(_searchFocusNode!.hasFocus);
-      });
+      _searchFocusNode!.addListener(_handleFocusChange);
     }
   }
 
@@ -404,14 +272,12 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
 
     if (mounted) _updateSelection();
 
-    _controller.value._isDropdownOpen =
-        _focusNode.hasFocus || _searchFocusNode?.hasFocus == true;
+    _controller.value._isDropdownOpen = _focusNode.hasFocus || _searchFocusNode?.hasFocus == true;
   }
 
   void _updateSelection() {
     setState(() {
-      _selectionMode =
-          _focusNode.hasFocus || _searchFocusNode?.hasFocus == true;
+      _selectionMode = _focusNode.hasFocus || _searchFocusNode?.hasFocus == true;
     });
   }
 
@@ -443,8 +309,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
             splashFactory: null,
             onTap: widget.disabled ? null : _toggleFocus,
             child: Container(
-              constraints:
-                  BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+              constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
               padding: widget.padding,
               decoration: _getContainerDecoration(),
               child: widget.data == null || !widget.data!.loading
@@ -484,11 +349,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
       );
     }
 
-    if (widget.renderSelected != null) {
-      return widget.renderSelected!(_selectedOptions);
-    }
-
-    return _buildSelectedItems();
+    return widget.renderSelected(_selectedOptions);
   }
 
   /// return true if any item is selected.
@@ -499,8 +360,8 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
     return widget.inputDecoration ??
         BoxDecoration(
           color: widget.fieldBackgroundColor ?? Colors.white,
-          borderRadius: widget.radiusGeometry ??
-              BorderRadius.circular(widget.fieldBorderRadius ?? 12.0),
+          borderRadius:
+              widget.radiusGeometry ?? BorderRadius.circular(widget.fieldBorderRadius ?? 12.0),
           border: _selectionMode
               ? Border.all(
                   color: widget.focusedBorderColor ?? Colors.grey,
@@ -536,47 +397,8 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
     super.dispose();
   }
 
-  /// Build the selected items for the dropdown.
-  Widget _buildSelectedItems() {
-    if (widget.chipConfig.wrapType == WrapType.scroll) {
-      return ListView.separated(
-        separatorBuilder: (context, index) =>
-            _getChipSeparator(widget.chipConfig),
-        scrollDirection: Axis.horizontal,
-        itemCount: _selectedOptions.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          final option = _selectedOptions[index];
-          if (widget.selectedItemBuilder != null) {
-            return widget.selectedItemBuilder!(context, option);
-          }
-          return _buildChip(
-            option,
-            widget.chipConfig,
-            !_disabledOptions.contains(_selectedOptions[index]),
-          );
-        },
-      );
-    }
-    return Wrap(
-        spacing: widget.chipConfig.spacing,
-        runSpacing: widget.chipConfig.runSpacing,
-        children: mapIndexed(_selectedOptions, (index, item) {
-          if (widget.selectedItemBuilder != null) {
-            return widget.selectedItemBuilder!(
-                context, _selectedOptions[index]);
-          }
-          return _buildChip(
-            _selectedOptions[index],
-            widget.chipConfig,
-            !_disabledOptions.contains(_selectedOptions[index]),
-          );
-        }).toList());
-  }
-
   /// Util method to map with index.
-  Iterable<E> mapIndexed<E, F>(
-      Iterable<F> items, E Function(int index, F item) f) sync* {
+  Iterable<E> mapIndexed<E, F>(Iterable<F> items, E Function(int index, F item) f) sync* {
     var index = 0;
 
     for (final item in items) {
@@ -585,40 +407,12 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
     }
   }
 
-  /// Get the chip separator.
-  Widget _getChipSeparator(ChipConfig chipConfig) {
-    if (chipConfig.separator != null) {
-      return chipConfig.separator!;
-    }
-
-    return SizedBox(
-      width: chipConfig.spacing,
-    );
-  }
-
   /// Handle the focus change on tap outside of the dropdown.
   void _onOutSideTap() {
     if (_searchFocusNode != null) {
       _searchFocusNode!.unfocus();
     }
     _focusNode.unfocus();
-  }
-
-  /// Buid the selected item chip.
-  Widget _buildChip(ValueItem<T> item, ChipConfig chipConfig, isEnabled) {
-    return SelectionChip<T>(
-      item: item,
-      chipConfig: chipConfig,
-      onItemDelete: isEnabled
-          ? (removedItem) {
-              widget.onOptionRemoved?.call(_options.indexOf(removedItem),
-                  _selectedOptions[_selectedOptions.indexOf(removedItem)]);
-
-              _controller.clearSelection(removedItem);
-              if (_focusNode.hasFocus) _focusNode.unfocus();
-            }
-          : null,
-    );
   }
 
   /// Method to toggle the focus of the dropdown.
@@ -650,23 +444,21 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
 
     return OverlayEntry(builder: (context) {
       List<ValueItem<T>> selectedOptions = [..._selectedOptions];
-      final searchController = TextEditingController();
+      String keyword = '';
       final scroll = ScrollController();
 
       return StatefulBuilder(builder: ((context, dropdownState) {
-        List<ValueItem<T>> options = _options;
-        Widget renderOption(int index) {
-          final option = options[index];
-          final isSelected = selectedOptions.contains(option);
+        Widget renderOption(ValueItem<T> e) {
+          final isSelected = selectedOptions.contains(e);
 
           onTap() {
             if (widget.selectionType == SelectionType.multi) {
               if (isSelected) {
                 dropdownState(() {
-                  selectedOptions.remove(option);
+                  selectedOptions.remove(e);
                 });
                 setState(() {
-                  _selectedOptions.remove(option);
+                  _selectedOptions.remove(e);
                 });
               } else {
                 final bool hasReachMax = widget.maxItems == null
@@ -675,20 +467,20 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                 if (hasReachMax) return;
 
                 dropdownState(() {
-                  selectedOptions.add(option);
+                  selectedOptions.add(e);
                 });
                 setState(() {
-                  _selectedOptions.add(option);
+                  _selectedOptions.add(e);
                 });
               }
             } else {
               dropdownState(() {
                 selectedOptions.clear();
-                selectedOptions.add(option);
+                selectedOptions.add(e);
               });
               setState(() {
                 _selectedOptions.clear();
-                _selectedOptions.add(option);
+                _selectedOptions.add(e);
               });
               _focusNode.unfocus();
             }
@@ -702,14 +494,14 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
           if (widget.optionBuilder != null) {
             return InkWell(
               onTap: onTap,
-              child: widget.optionBuilder!(context, option, isSelected),
+              child: widget.optionBuilder!(context, e, isSelected),
             );
           }
 
           final primaryColor = Theme.of(context).primaryColor;
 
           return _buildOption(
-            option: option,
+            option: e,
             primaryColor: primaryColor,
             isSelected: isSelected,
             dropdownState: dropdownState,
@@ -722,7 +514,9 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
           widget.data!.setFncRender(dropdownState);
           scroll.addListener(() {
             if (scroll.position.pixels >= scroll.position.maxScrollExtent) {
-              widget.data!.getList(onLoadDone: _options.addAll);
+              widget.data!.getList(onLoadDone: (v) {
+                if (mounted) _options.addAll(v);
+              });
             }
           });
         }
@@ -733,24 +527,16 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: _onOutSideTap,
-                child: const ColoredBox(
-                  color: Colors.transparent,
-                ),
+                child: const ColoredBox(color: Colors.transparent),
               ),
             ),
             CompositedTransformFollower(
               link: _layerLink,
               showWhenUnlinked: true,
-              targetAnchor:
-                  showOnTop ? Alignment.topLeft : Alignment.bottomLeft,
-              followerAnchor:
-                  showOnTop ? Alignment.bottomLeft : Alignment.topLeft,
+              targetAnchor: showOnTop ? Alignment.topLeft : Alignment.bottomLeft,
+              followerAnchor: showOnTop ? Alignment.bottomLeft : Alignment.topLeft,
               offset: widget.dropdownMargin != null
-                  ? Offset(
-                      0,
-                      showOnTop
-                          ? -widget.dropdownMargin!
-                          : widget.dropdownMargin!)
+                  ? Offset(0, showOnTop ? -widget.dropdownMargin! : widget.dropdownMargin!)
                   : Offset.zero,
               child: Material(
                   color: widget.dropdownBackgroundColor ?? Colors.white,
@@ -771,86 +557,70 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                           : null,
                     ),
                     padding: widget.dropdownPadding,
-                    constraints: widget.searchEnabled
-                        ? BoxConstraints.loose(
-                            Size(size.width, widget.dropdownHeight + 50))
-                        : BoxConstraints.loose(
-                            Size(size.width, widget.dropdownHeight)),
+                    constraints: widget.onRenderSearch != null
+                        ? BoxConstraints.loose(Size(size.width, widget.dropdownHeight + 50))
+                        : BoxConstraints.loose(Size(size.width, widget.dropdownHeight)),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (widget.searchEnabled) ...[
-                          ColoredBox(
-                            color:
-                                widget.dropdownBackgroundColor ?? Colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: TextFormField(
-                                controller: searchController,
-                                onTapOutside: (_) {},
-                                scrollPadding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context)
-                                        .viewInsets
-                                        .bottom),
-                                focusNode: _searchFocusNode,
-                                decoration: InputDecoration(
-                                  fillColor: widget.searchBackgroundColor ??
-                                      Colors.grey.shade200,
-                                  isDense: true,
-                                  filled: true,
-                                  hintText: widget.searchLabel,
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        widget.fieldBorderRadius ?? 12),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.shade300,
-                                      width: 0.8,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        widget.fieldBorderRadius ?? 12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor,
-                                      width: 0.8,
-                                    ),
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () {
-                                      searchController.clear();
-                                      dropdownState(() {
-                                        options = _options;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                onChanged: (value) {
-                                  dropdownState(() {
-                                    options = _options
-                                        .where((element) => element.label
-                                            .toLowerCase()
-                                            .contains(value.toLowerCase()))
-                                        .toList();
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                          const Divider(
-                            height: 1,
-                          ),
-                        ],
+                        if (widget.onRenderSearch != null)
+                          widget.onRenderSearch!(
+                              _searchFocusNode, (v) => dropdownState(() => keyword = v)),
+                        // ColoredBox(
+                        //   color: widget.dropdownBackgroundColor ?? Colors.white,
+                        //   child: Padding(
+                        //     padding: const EdgeInsets.all(8.0),
+                        //     child: TextFormField(
+                        //       controller: searchController,
+                        //       onTapOutside: (_) {},
+                        //       // scrollPadding: EdgeInsets.only(
+                        //       //     bottom: MediaQuery.of(context).viewInsets.bottom),
+                        //       focusNode: _searchFocusNode,
+                        //       decoration: InputDecoration(
+                        //         fillColor: widget.searchBackgroundColor ?? Colors.grey.shade200,
+                        //         isDense: true,
+                        //         filled: true,
+                        //         hintText: widget.searchLabel,
+                        //         enabledBorder: OutlineInputBorder(
+                        //           borderRadius:
+                        //               BorderRadius.circular(widget.fieldBorderRadius ?? 12),
+                        //           borderSide: BorderSide(
+                        //             color: Colors.grey.shade300,
+                        //             width: 0.8,
+                        //           ),
+                        //         ),
+                        //         focusedBorder: OutlineInputBorder(
+                        //           borderRadius:
+                        //               BorderRadius.circular(widget.fieldBorderRadius ?? 12),
+                        //           borderSide: BorderSide(
+                        //             color: Theme.of(context).primaryColor,
+                        //             width: 0.8,
+                        //           ),
+                        //         ),
+                        //         suffixIcon: IconButton(
+                        //           icon: const Icon(Icons.close),
+                        //           onPressed: () {
+                        //             searchController.clear();
+                        //             dropdownState(() => keyword = '');
+                        //           },
+                        //         ),
+                        //       ),
+                        //       onChanged: (v) => dropdownState(() => keyword = v),
+                        //     ),
+                        //   ),
+                        // ),
                         Expanded(
                           child: ListView(
                             controller: scroll,
                             shrinkWrap: true,
                             padding: EdgeInsets.zero,
                             children: [
-                              ...List.generate(options.length, renderOption),
-                              if (widget.data != null &&
-                                  widget.data!.loadingMore &&
-                                  widget.loadingMore != null)
+                              ..._options
+                                  .where((e) => keyword.isEmpty
+                                      ? true
+                                      : e.label.toLowerCase().contains(keyword.toLowerCase()))
+                                  .map(renderOption),
+                              if (widget.data != null && widget.data!.loadingMore)
                                 widget.loadingMore!
                             ],
                           ),
@@ -865,13 +635,14 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
     });
   }
 
-  ListTile _buildOption(
-          {required ValueItem<T> option,
-          required Color primaryColor,
-          required bool isSelected,
-          required StateSetter dropdownState,
-          required void Function() onTap,
-          required List<ValueItem<T>> selectedOptions}) =>
+  ListTile _buildOption({
+    required ValueItem<T> option,
+    required Color primaryColor,
+    required bool isSelected,
+    required StateSetter dropdownState,
+    required void Function() onTap,
+    required List<ValueItem<T>> selectedOptions,
+  }) =>
       ListTile(
         title: Text(option.label,
             style: widget.optionTextStyle ??
@@ -883,8 +654,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
         autofocus: true,
         dense: true,
         tileColor: widget.optionsBackgroundColor ?? Colors.white,
-        selectedTileColor:
-            widget.selectedOptionBackgroundColor ?? Colors.grey.shade200,
+        selectedTileColor: widget.selectedOptionBackgroundColor ?? Colors.grey.shade200,
         enabled: !_disabledOptions.contains(option),
         onTap: onTap,
         leading: _getSelectedIcon(isSelected),
@@ -916,16 +686,10 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
             )),
             CompositedTransformFollower(
                 link: _layerLink,
-                targetAnchor:
-                    showOnTop ? Alignment.topLeft : Alignment.bottomLeft,
-                followerAnchor:
-                    showOnTop ? Alignment.bottomLeft : Alignment.topLeft,
+                targetAnchor: showOnTop ? Alignment.topLeft : Alignment.bottomLeft,
+                followerAnchor: showOnTop ? Alignment.bottomLeft : Alignment.topLeft,
                 offset: widget.dropdownMargin != null
-                    ? Offset(
-                        0,
-                        showOnTop
-                            ? -widget.dropdownMargin!
-                            : widget.dropdownMargin!)
+                    ? Offset(0, showOnTop ? -widget.dropdownMargin! : widget.dropdownMargin!)
                     : Offset.zero,
                 child: Material(
                     clipBehavior: Clip.none,
@@ -935,18 +699,15 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                     elevation: 4,
                     child: Container(
                         width: size.width,
-                        constraints: BoxConstraints.loose(
-                            Size(size.width, widget.dropdownHeight)),
+                        constraints: BoxConstraints.loose(Size(size.width, widget.dropdownHeight)),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             widget.responseErrorBuilder != null
-                                ? widget.responseErrorBuilder!(
-                                    context, widget.data!.error)
+                                ? widget.responseErrorBuilder!(context, widget.data!.error)
                                 : Padding(
                                     padding: const EdgeInsets.all(16.0),
-                                    child: Text(
-                                        'Error fetching data: ${widget.data!.error}'),
+                                    child: Text('Error fetching data: ${widget.data!.error}'),
                                   ),
                           ],
                         ))))
@@ -1022,8 +783,7 @@ class _MultiSelectController<T> {
 }
 
 /// implementation of the MultiSelectController class.
-class MultiSelectController<T>
-    extends ValueNotifier<_MultiSelectController<T>> {
+class MultiSelectController<T> extends ValueNotifier<_MultiSelectController<T>> {
   MultiSelectController() : super(_MultiSelectController());
 
   bool _isDisposed = false;
@@ -1054,8 +814,7 @@ class MultiSelectController<T>
     }
 
     if (!value._options.contains(option)) {
-      throw Exception(
-          'Cannot clear selection of an option that is not in the options list');
+      throw Exception('Cannot clear selection of an option that is not in the options list');
     }
 
     value._selectedOptions.remove(option);
@@ -1097,8 +856,7 @@ class MultiSelectController<T>
   /// [MultiSelectController] is used to set disabled options.
   void setDisabledOptions(List<ValueItem<T>> disabledOptions) {
     if (disabledOptions.any((element) => !value._options.contains(element))) {
-      throw Exception(
-          'Cannot disable options that are not in the options list');
+      throw Exception('Cannot disable options that are not in the options list');
     }
 
     value._disabledOptions.clear();
@@ -1129,9 +887,8 @@ class MultiSelectController<T>
   List<ValueItem<T>> get disabledOptions => value._disabledOptions;
 
   /// get enabled options
-  List<ValueItem<T>> get enabledOptions => value._options
-      .where((element) => !value._disabledOptions.contains(element))
-      .toList();
+  List<ValueItem<T>> get enabledOptions =>
+      value._options.where((element) => !value._disabledOptions.contains(element)).toList();
 
   /// get options
   List<ValueItem<T>> get options => value._options;
