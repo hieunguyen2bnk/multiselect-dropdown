@@ -120,11 +120,11 @@ class MultiSelectDropDown<T> extends StatefulWidget {
 
   final Widget? loadingMore;
 
-  final double? height;
-
   final Widget Function(List<ValueItem> selectedOptions)? renderSelected;
 
   final Widget Function(void Function() clear)? renderClearIcon;
+
+  final void Function(bool hasFocus)? onFocusSearch;
 
   /// MultiSelectDropDown is a widget that allows the user to select multiple options from a list of options. It is a dropdown that allows the user to select multiple options.
   ///
@@ -236,6 +236,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     required this.data,
     required this.loading,
     required this.loadingMore,
+    this.onFocusSearch,
     this.onOptionRemoved,
     this.responseErrorBuilder,
     this.selectedOptionTextColor,
@@ -281,7 +282,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.dropdownPadding,
     this.borderRadiusOption,
     this.disabled = false,
-    this.height,
     this.renderSelected,
   }) : super(key: key);
 
@@ -357,7 +357,10 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
 
     if (widget.searchEnabled) {
       _searchFocusNode = FocusNode();
-      _searchFocusNode!.addListener(_handleFocusChange);
+      _searchFocusNode!.addListener(() {
+        _handleFocusChange();
+        widget.onFocusSearch?.call(_searchFocusNode!.hasFocus);
+      });
     }
   }
 
@@ -440,16 +443,13 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
             splashFactory: null,
             onTap: widget.disabled ? null : _toggleFocus,
             child: Container(
-              height: widget.height,
               constraints:
                   BoxConstraints(minWidth: MediaQuery.of(context).size.width),
               padding: widget.padding,
               decoration: _getContainerDecoration(),
               child: widget.data == null || !widget.data!.loading
                   ? Row(children: [
-                      Expanded(
-                        child: _getContainerContent(),
-                      ),
+                      Expanded(child: _getContainerContent()),
                       if (widget.renderClearIcon != null && _anyItemSelected)
                         widget.renderClearIcon!(clear),
                       _buildSuffixIcon(),
