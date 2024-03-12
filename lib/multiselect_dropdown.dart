@@ -58,7 +58,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final double? focusedBorderWidth;
   final EdgeInsets? padding;
 
-  final int? maxItems;
+  final int? maxItemSelect;
 
   final Color? dropdownBackgroundColor;
   final Color? searchBackgroundColor;
@@ -98,8 +98,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
 
   final Widget Function(void Function() clear)? renderClearIcon;
 
-  final Widget Function(FocusNode? focusNode, void Function(String v) search)?
-      onRenderSearch;
+  final Widget Function(FocusNode? focusNode, void Function(String v) search)? onRenderSearch;
 
   const MultiSelectDropDown({
     Key? key,
@@ -138,7 +137,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.focusedBorderWidth = 0.4,
     this.fieldBorderRadius = 12.0,
     this.radiusGeometry,
-    this.maxItems,
+    this.maxItemSelect,
     this.focusNode,
     this.controller,
     this.onRenderSearch,
@@ -461,9 +460,9 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                   _selectedOptions.remove(e);
                 });
               } else {
-                final bool hasReachMax = widget.maxItems == null
+                final bool hasReachMax = widget.maxItemSelect == null
                     ? false
-                    : (_selectedOptions.length + 1) > widget.maxItems!;
+                    : (_selectedOptions.length + 1) > widget.maxItemSelect!;
                 if (hasReachMax) return;
 
                 dropdownState(() {
@@ -557,9 +556,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                           : null,
                     ),
                     padding: widget.dropdownPadding,
-                    constraints: widget.onRenderSearch != null
-                        ? BoxConstraints.loose(Size(size.width, widget.dropdownHeight + 50))
-                        : BoxConstraints.loose(Size(size.width, widget.dropdownHeight)),
+                    constraints: BoxConstraints.loose(Size(size.width, widget.dropdownHeight)),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
