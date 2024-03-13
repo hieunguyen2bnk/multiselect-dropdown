@@ -31,7 +31,8 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   // options configuration
   final double dropdownHeight;
 
-  final Widget Function(BuildContext ctx, ValueItem<T> item, bool selected) optionBuilder;
+  final Widget Function(BuildContext ctx, ValueItem<T> item, bool selected, void Function() onTap)
+      optionBuilder;
 
   // dropdownfield configuration
   final Color? fieldBackgroundColor;
@@ -407,7 +408,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
         Widget renderOption(ValueItem<T> e) {
           final isSelected = selectedOptions.contains(e);
 
-          onTap() {
+          void onTap() {
             if (widget.selectionType == SelectionType.multi) {
               if (isSelected) {
                 dropdownState(() {
@@ -447,10 +448,7 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
             widget.onOptionSelected?.call(_selectedOptions);
           }
 
-          return InkWell(
-            onTap: onTap,
-            child: widget.optionBuilder(context, e, isSelected),
-          );
+          return widget.optionBuilder(context, e, isSelected, onTap);
         }
 
         if (widget.data != null) {
