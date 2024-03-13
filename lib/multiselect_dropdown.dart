@@ -19,7 +19,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   // Hint
   final String hint;
   final Color? hintColor;
-  final double? hintFontSize;
   final TextStyle? hintStyle;
   final EdgeInsetsGeometry? hintPadding;
 
@@ -29,21 +28,10 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final List<ValueItem<T>> disabledOptions;
   final OnOptionSelected<T>? onOptionSelected;
 
-  final void Function(int index, ValueItem<T> option)? onOptionRemoved;
-
-  // selected option
-  final Widget? selectedOptionIcon;
-  final Color? selectedOptionTextColor;
-  final Color? selectedOptionBackgroundColor;
-  final Widget Function(BuildContext, ValueItem<T>)? selectedItemBuilder;
-
   // options configuration
-  final Color? optionsBackgroundColor;
-  final TextStyle? optionTextStyle;
   final double dropdownHeight;
-  final bool alwaysShowOptionIcon;
 
-  final Widget Function(BuildContext ctx, ValueItem<T> item, bool selected)? optionBuilder;
+  final Widget Function(BuildContext ctx, ValueItem<T> item, bool selected) optionBuilder;
 
   // dropdownfield configuration
   final Color? fieldBackgroundColor;
@@ -61,7 +49,6 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   final int? maxItemSelect;
 
   final Color? dropdownBackgroundColor;
-  final Color? searchBackgroundColor;
 
   // dropdown border radius
   final double? dropdownBorderRadius;
@@ -78,15 +65,7 @@ class MultiSelectDropDown<T> extends StatefulWidget {
   /// [controller] is the controller for the dropdown. It can be used to programmatically open and close the dropdown.
   final MultiSelectController<T>? controller;
 
-  /// Search label
-  /// [searchLabel] is the label for search bar in dropdown.
-  final String? searchLabel;
-
-  final Widget? optionIcon;
-
   final EdgeInsets? dropdownPadding;
-
-  final BorderRadiusGeometry? borderRadiusOption;
 
   final bool disabled;
 
@@ -108,25 +87,17 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     required this.loading,
     required this.loadingMore,
     required this.renderSelected,
-    this.onOptionRemoved,
+    required this.optionBuilder,
     this.responseErrorBuilder,
-    this.selectedOptionTextColor,
     this.selectionType = SelectionType.multi,
     this.hint = 'Select',
     this.hintColor = Colors.grey,
-    this.hintFontSize = 14.0,
     this.selectedOptions = const [],
     this.disabledOptions = const [],
-    this.alwaysShowOptionIcon = false,
-    this.optionTextStyle,
-    this.selectedOptionIcon,
-    this.selectedOptionBackgroundColor,
-    this.optionsBackgroundColor,
     this.fieldBackgroundColor = Colors.white,
     required this.dropdownHeight,
     required this.suffixIcon,
     this.renderClearIcon,
-    this.selectedItemBuilder,
     this.inputDecoration,
     this.hintStyle,
     this.hintPadding = HintText.hintPaddingDefault,
@@ -144,13 +115,8 @@ class MultiSelectDropDown<T> extends StatefulWidget {
     this.dropdownBorderRadius,
     this.dropdownMargin,
     this.dropdownBackgroundColor,
-    this.searchBackgroundColor,
     this.animateSuffixIcon = true,
-    this.optionBuilder,
-    this.searchLabel = 'Search',
-    this.optionIcon,
     this.dropdownPadding,
-    this.borderRadiusOption,
     this.disabled = false,
   }) : super(key: key);
 
@@ -423,15 +389,6 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
     }
   }
 
-  /// Get the selectedItem icon for the dropdown
-  Widget? _getSelectedIcon(bool isSelected) {
-    if (isSelected) return widget.selectedOptionIcon;
-
-    if (!widget.alwaysShowOptionIcon) return null;
-
-    return widget.optionIcon;
-  }
-
   /// Create the overlay entry for the dropdown.
   OverlayEntry _buildOverlayEntry() {
     // Calculate the offset and the size of the dropdown button
@@ -490,22 +447,9 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
             widget.onOptionSelected?.call(_selectedOptions);
           }
 
-          if (widget.optionBuilder != null) {
-            return InkWell(
-              onTap: onTap,
-              child: widget.optionBuilder!(context, e, isSelected),
-            );
-          }
-
-          final primaryColor = Theme.of(context).primaryColor;
-
-          return _buildOption(
-            option: e,
-            primaryColor: primaryColor,
-            isSelected: isSelected,
-            dropdownState: dropdownState,
+          return InkWell(
             onTap: onTap,
-            selectedOptions: selectedOptions,
+            child: widget.optionBuilder(context, e, isSelected),
           );
         }
 
@@ -563,49 +507,6 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
                         if (widget.onRenderSearch != null)
                           widget.onRenderSearch!(
                               _searchFocusNode, (v) => dropdownState(() => keyword = v)),
-                        // ColoredBox(
-                        //   color: widget.dropdownBackgroundColor ?? Colors.white,
-                        //   child: Padding(
-                        //     padding: const EdgeInsets.all(8.0),
-                        //     child: TextFormField(
-                        //       controller: searchController,
-                        //       onTapOutside: (_) {},
-                        //       // scrollPadding: EdgeInsets.only(
-                        //       //     bottom: MediaQuery.of(context).viewInsets.bottom),
-                        //       focusNode: _searchFocusNode,
-                        //       decoration: InputDecoration(
-                        //         fillColor: widget.searchBackgroundColor ?? Colors.grey.shade200,
-                        //         isDense: true,
-                        //         filled: true,
-                        //         hintText: widget.searchLabel,
-                        //         enabledBorder: OutlineInputBorder(
-                        //           borderRadius:
-                        //               BorderRadius.circular(widget.fieldBorderRadius ?? 12),
-                        //           borderSide: BorderSide(
-                        //             color: Colors.grey.shade300,
-                        //             width: 0.8,
-                        //           ),
-                        //         ),
-                        //         focusedBorder: OutlineInputBorder(
-                        //           borderRadius:
-                        //               BorderRadius.circular(widget.fieldBorderRadius ?? 12),
-                        //           borderSide: BorderSide(
-                        //             color: Theme.of(context).primaryColor,
-                        //             width: 0.8,
-                        //           ),
-                        //         ),
-                        //         suffixIcon: IconButton(
-                        //           icon: const Icon(Icons.close),
-                        //           onPressed: () {
-                        //             searchController.clear();
-                        //             dropdownState(() => keyword = '');
-                        //           },
-                        //         ),
-                        //       ),
-                        //       onChanged: (v) => dropdownState(() => keyword = v),
-                        //     ),
-                        //   ),
-                        // ),
                         Expanded(
                           child: ListView(
                             controller: scroll,
@@ -631,35 +532,6 @@ class _MultiSelectDropDownState<T> extends State<MultiSelectDropDown<T>> {
       }));
     });
   }
-
-  ListTile _buildOption({
-    required ValueItem<T> option,
-    required Color primaryColor,
-    required bool isSelected,
-    required StateSetter dropdownState,
-    required void Function() onTap,
-    required List<ValueItem<T>> selectedOptions,
-  }) =>
-      ListTile(
-        title: Text(option.label,
-            style: widget.optionTextStyle ??
-                TextStyle(
-                  fontSize: widget.hintFontSize,
-                )),
-        selectedColor: widget.selectedOptionTextColor ?? primaryColor,
-        selected: isSelected,
-        autofocus: true,
-        dense: true,
-        tileColor: widget.optionsBackgroundColor ?? Colors.white,
-        selectedTileColor: widget.selectedOptionBackgroundColor ?? Colors.grey.shade200,
-        enabled: !_disabledOptions.contains(option),
-        onTap: onTap,
-        leading: _getSelectedIcon(isSelected),
-        shape: widget.borderRadiusOption == null
-            ? null
-            : RoundedRectangleBorder(borderRadius: widget.borderRadiusOption!),
-        // trailing: _getSelectedIcon(isSelected, primaryColor),
-      );
 
   /// Builds overlay entry for showing error when fetching data from network fails.
   OverlayEntry _buildNetworkErrorOverlayEntry() {
